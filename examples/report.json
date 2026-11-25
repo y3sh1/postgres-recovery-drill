@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "run_id": "d76d41be45144009a2901f9cd9e1bb9b",
+  "started_at": "2026-11-25T13:24:06.063785+00:00",
+  "journal_count": 100,
+  "currency": "USD",
+  "postgres_version": "17.12 (Debian 17.12-1.pgdg13+1)",
+  "pg_dump_version": "pg_dump (PostgreSQL) 17.12 (Debian 17.12-1.pgdg13+1)",
+  "pg_restore_version": "pg_restore (PostgreSQL) 17.12 (Debian 17.12-1.pgdg13+1)",
+  "scenarios": [
+    {
+      "name": "fresh",
+      "expected_outcome": "verified",
+      "expected_evidence": {
+        "missing_ids": [],
+        "unexpected_ids": [],
+        "changed": [],
+        "recovered_count": 100
+      },
+      "archive_sha256": "c0dd5c50e93ccd9d5297f8403c1df86e9898e2c9dacdf19d599846f6473647f9",
+      "archive_bytes": 2467,
+      "ready_seconds": 0.0392,
+      "probe_order_id": "ORD-001",
+      "probe_http_status": 200,
+      "comparison": {
+        "expected_count": 100,
+        "recovered_count": 100,
+        "matched_count": 100,
+        "missing_ids": [],
+        "unexpected_ids": [],
+        "changed": [],
+        "completeness_pct": 100.0
+      },
+      "restore_error": null,
+      "restore_exit_code": 0,
+      "restore_seconds": 0.0317,
+      "orders_table_present": true,
+      "outcome": "verified",
+      "passed": true
+    },
+    {
+      "name": "stale",
+      "expected_outcome": "missing_orders",
+      "expected_evidence": {
+        "missing_ids": [
+          "ORD-096",
+          "ORD-097",
+          "ORD-098",
+          "ORD-099",
+          "ORD-100"
+        ],
+        "unexpected_ids": [],
+        "changed": [],
+        "recovered_count": 95
+      },
+      "archive_sha256": "a25b61e5c7b7455d73e06b6886b28543ea6adcd61c5a4fdc2f7d81207de0721a",
+      "archive_bytes": 2443,
+      "ready_seconds": 0.0443,
+      "probe_order_id": "ORD-001",
+      "probe_http_status": 200,
+      "comparison": {
+        "expected_count": 100,
+        "recovered_count": 95,
+        "matched_count": 95,
+        "missing_ids": [
+          "ORD-096",
+          "ORD-097",
+          "ORD-098",
+          "ORD-099",
+          "ORD-100"
+        ],
+        "unexpected_ids": [],
+        "changed": [],
+        "completeness_pct": 95.0
+      },
+      "restore_error": null,
+      "restore_exit_code": 0,
+      "restore_seconds": 0.0359,
+      "orders_table_present": true,
+      "outcome": "missing_orders",
+      "passed": true
+    },
+    {
+      "name": "altered",
+      "expected_outcome": "changed_orders",
+      "expected_evidence": {
+        "missing_ids": [],
+        "unexpected_ids": [],
+        "changed": [
+          {
+            "order_id": "ORD-042",
+            "expected": {
+              "amount_cents": 2554,
+              "currency": "USD"
+            },
+            "actual": {
+              "amount_cents": 2654,
+              "currency": "USD"
+            }
+          }
+        ],
+        "recovered_count": 100
+      },
+      "archive_sha256": "f57cf5d9bd1ee44def04d0bd2368badb31a1ac3850dc1ae38e1127ffe4b95851",
+      "archive_bytes": 2501,
+      "ready_seconds": 0.0385,
+      "probe_order_id": "ORD-001",
+      "probe_http_status": 200,
+      "comparison": {
+        "expected_count": 100,
+        "recovered_count": 100,
+        "matched_count": 99,
+        "missing_ids": [],
+        "unexpected_ids": [],
+        "changed": [
+          {
+            "order_id": "ORD-042",
+            "expected": {
+              "amount_cents": 2554,
+              "currency": "USD"
+            },
+            "actual": {
+              "amount_cents": 2654,
+              "currency": "USD"
+            }
+          }
+        ],
+        "completeness_pct": 99.0
+      },
+      "restore_error": null,
+      "restore_exit_code": 0,
+      "restore_seconds": 0.0311,
+      "orders_table_present": true,
+      "outcome": "changed_orders",
+      "passed": true
+    },
+    {
+      "name": "truncated",
+      "expected_outcome": "restore_failed",
+      "expected_evidence": {
+        "archive_bytes": 8,
+        "orders_table_present": false,
+        "ready_seconds": null
+      },
+      "archive_sha256": "24cc5d893675985b13086020a4c7d24fea7484fed40f43575efa72d82f406838",
+      "archive_bytes": 8,
+      "ready_seconds": null,
+      "probe_order_id": null,
+      "probe_http_status": null,
+      "comparison": null,
+      "restore_error": "pg_restore: error: could not read from input file: end of file",
+      "restore_exit_code": 1,
+      "restore_seconds": 0.019,
+      "outcome": "restore_failed",
+      "orders_table_present": false,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "observations_sha256": "64cd9e11a1cd30b87e2f00a203ee2af95dc8db459a26f183bad904dc7105599a"
+}

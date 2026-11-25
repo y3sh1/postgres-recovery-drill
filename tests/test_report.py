@@ -68,7 +68,7 @@ class OutputTests(unittest.TestCase):
                    "expected_evidence": {"id": untrusted}}
         truncated = {"name": "truncated", "expected_outcome": "restore_failed", "outcome": "restore_failed",
                      "passed": True, "comparison": None, "restore_error": untrusted,
-                     "ready_seconds": None, "restore_seconds": 0.102}
+                     "ready_seconds": None, "restore_seconds": 0.102, "orders_table_present": False}
         report = {"run_id": untrusted, "started_at": "2025-01-15T16:00:00Z", "journal_count": 1,
                   "scenarios": [altered, truncated], "passed": True}
         with TemporaryDirectory() as parent:
@@ -82,8 +82,11 @@ class OutputTests(unittest.TestCase):
             self.assertIn("&lt;script&gt;", html)
             self.assertIn("0.614 s", html)
             self.assertIn("Order completeness is unknown", html)
+            self.assertIn("Skipped after restore failure", html)
+            self.assertIn("Orders table after restore</dt><dd>Absent", html)
             self.assertIn("2 / 2", html)
             self.assertIn('href="report.json"', html)
+            self.assertIn('href="observations.json"', html)
             self.assertEqual(json.loads((out / "report.json").read_text(encoding="utf-8")), report)
             report["run_id"] = "repeat"
             write_report(out, report)

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PostgreSQL recovery drill</title><style>
+:root { color-scheme: light; --ink: #172b36; --quiet: #405964; --line: #b8cbd0;
+        --paper: #fff; --accent: #005b61; }
+* { box-sizing: border-box }
+body { margin: 0; background: #f2f6f5; color: var(--ink);
+       font: 1rem/1.55 Inter,"Segoe UI",system-ui,sans-serif }
+main { max-width: 76rem; margin: 2rem auto; padding: clamp(1rem,4vw,3rem);
+       background: var(--paper); border-top: .35rem solid var(--accent) }
+h1,h2,h3,h4,p,dl { margin: 0 }
+h1 { font-size: clamp(1.9rem,4vw,3rem); line-height: 1.12; letter-spacing: -.035em }
+h2 { margin-top: 2.3rem; font-size: 1.4rem }
+h3 { margin-top: 1.5rem; font-size: 1.13rem }
+h4 { margin-top: 1rem; font-size: 1rem }
+a,summary { color: var(--accent) }
+a:focus-visible,summary:focus-visible { outline: 3px solid #b34c00; outline-offset: 3px }
+.subtle,.note,dt { color: var(--quiet) }
+.note { margin: .6rem 0; max-width: 83ch }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit,minmax(12rem,1fr));
+           gap: 1.1rem; margin-top: 1.5rem; padding: 1rem 0; border-block: 1px solid var(--line) }
+dd { margin: .1rem 0 0; overflow-wrap: anywhere }
+.metrics dd { font-size: 1.4rem; font-weight: 650 }
+.scroll { overflow-x: auto }
+table { width: 100%; border-collapse: collapse; margin: .65rem 0 }
+th,td { padding: .55rem .65rem; border-bottom: 1px solid var(--line);
+        text-align: left; vertical-align: top }
+thead th { color: var(--quiet); background: #eff5f4; font-size: .9rem }
+th:first-child,td:first-child { padding-left: .45rem }
+.good { color: #006043 }
+.bad { color: #8a2e19; font-weight: 650 }
+details { border-bottom: 1px solid var(--line); padding: .8rem 0 }
+summary { cursor: pointer; font-weight: 650; width: fit-content }
+.facts { display: grid; grid-template-columns: repeat(auto-fit,minmax(12rem,1fr));
+         gap: .55rem 1rem; margin: .9rem 0 }
+.mono,code,pre { font-family: ui-monospace,Consolas,monospace; overflow-wrap: anywhere }
+pre { white-space: pre-wrap; padding: .7rem; background: #eff5f4 }
+ul { margin: .3rem 0; padding-left: 1.4rem }
+footer { margin-top: 1.5rem; color: var(--quiet) }
+@media (max-width: 44rem) { main { margin: 0 } .metrics { gap: .6rem } }
+</style></head><body><main>
+<header><h1>PostgreSQL recovery drill</h1>
+<p class="subtle">Run <code>d76d41be45144009a2901f9cd9e1bb9b</code> · Started 2026-11-25T13:24:06.063785+00:00</p></header>
+<dl class="metrics"><div><dt>Scenarios matching expectations</dt><dd>4 / 4</dd></div><div><dt>Receipts in the journal</dt><dd>100</dd></div></dl>
+<h2>Recovery outcomes</h2>
+<p class="note">First order read measures elapsed time from the start of restoration through the first successful
+HTTP order lookup. Exact matches compare each receipt’s order ID, amount and currency.</p>
+<div class="scroll"><table><thead><tr><th scope="col">Archive</th><th scope="col">Expected</th>
+<th scope="col">Observed</th><th scope="col">Restore</th><th scope="col">First order read</th>
+<th scope="col">Exact matches</th><th scope="col">Scenario check</th></tr></thead>
+<tbody><tr><th scope='row'>Fresh archive</th><td>Verified</td><td>Verified</td><td>0.032 s</td><td>0.039 s</td><td>100 / 100</td><td><span class='good'>Matched</span></td></tr><tr><th scope='row'>Stale archive</th><td>Missing orders</td><td>Missing orders</td><td>0.036 s</td><td>0.044 s</td><td>95 / 100</td><td><span class='good'>Matched</span></td></tr><tr><th scope='row'>Altered order</th><td>Changed orders</td><td>Changed orders</td><td>0.031 s</td><td>0.038 s</td><td>99 / 100</td><td><span class='good'>Matched</span></td></tr><tr><th scope='row'>Truncated archive</th><td>Restore failed</td><td>Restore failed</td><td>0.019 s</td><td>—</td><td>—</td><td><span class='good'>Matched</span></td></tr></tbody></table></div>
+<h2>Evidence by scenario</h2><details><summary>Fresh archive</summary><dl class='facts'><div><dt>Archive SHA-256</dt><dd>c0dd5c50e93ccd9d5297f8403c1df86e9898e2c9dacdf19d599846f6473647f9</dd></div><div><dt>Archive size (bytes)</dt><dd>2467</dd></div><div><dt>Restore exit code</dt><dd>0</dd></div><div><dt>HTTP probe order</dt><dd>ORD-001</dd></div><div><dt>HTTP status</dt><dd>200</dd></div><div><dt>Orders table after restore</dt><dd>Present</dd></div></dl><p>100 of 100 journal receipts matched exactly (100%). The recovered database contained 100 orders.</p><h4>Expected evidence</h4><pre>{
+  &quot;missing_ids&quot;: [],
+  &quot;unexpected_ids&quot;: [],
+  &quot;changed&quot;: [],
+  &quot;recovered_count&quot;: 100
+}</pre></details><details><summary>Stale archive</summary><dl class='facts'><div><dt>Archive SHA-256</dt><dd>a25b61e5c7b7455d73e06b6886b28543ea6adcd61c5a4fdc2f7d81207de0721a</dd></div><div><dt>Archive size (bytes)</dt><dd>2443</dd></div><div><dt>Restore exit code</dt><dd>0</dd></div><div><dt>HTTP probe order</dt><dd>ORD-001</dd></div><div><dt>HTTP status</dt><dd>200</dd></div><div><dt>Orders table after restore</dt><dd>Present</dd></div></dl><p>95 of 100 journal receipts matched exactly (95%). The recovered database contained 95 orders.</p><h4>Missing order IDs</h4><p class='mono'>ORD-096, ORD-097, ORD-098, ORD-099, ORD-100</p><h4>Expected evidence</h4><pre>{
+  &quot;missing_ids&quot;: [
+    &quot;ORD-096&quot;,
+    &quot;ORD-097&quot;,
+    &quot;ORD-098&quot;,
+    &quot;ORD-099&quot;,
+    &quot;ORD-100&quot;
+  ],
+  &quot;unexpected_ids&quot;: [],
+  &quot;changed&quot;: [],
+  &quot;recovered_count&quot;: 95
+}</pre></details><details><summary>Altered order</summary><dl class='facts'><div><dt>Archive SHA-256</dt><dd>f57cf5d9bd1ee44def04d0bd2368badb31a1ac3850dc1ae38e1127ffe4b95851</dd></div><div><dt>Archive size (bytes)</dt><dd>2501</dd></div><div><dt>Restore exit code</dt><dd>0</dd></div><div><dt>HTTP probe order</dt><dd>ORD-001</dd></div><div><dt>HTTP status</dt><dd>200</dd></div><div><dt>Orders table after restore</dt><dd>Present</dd></div></dl><p>99 of 100 journal receipts matched exactly (99%). The recovered database contained 100 orders.</p><h4>Changed orders</h4><div class='scroll'><table><thead><tr><th scope='col'>Order</th><th scope='col'>Journal amount (cents)</th><th scope='col'>Journal currency</th><th scope='col'>Recovered amount (cents)</th><th scope='col'>Recovered currency</th></tr></thead><tbody><tr><th scope='row'>ORD-042</th><td>2554</td><td>USD</td><td>2654</td><td>USD</td></tr></tbody></table></div><h4>Expected evidence</h4><pre>{
+  &quot;missing_ids&quot;: [],
+  &quot;unexpected_ids&quot;: [],
+  &quot;changed&quot;: [
+    {
+      &quot;order_id&quot;: &quot;ORD-042&quot;,
+      &quot;expected&quot;: {
+        &quot;amount_cents&quot;: 2554,
+        &quot;currency&quot;: &quot;USD&quot;
+      },
+      &quot;actual&quot;: {
+        &quot;amount_cents&quot;: 2654,
+        &quot;currency&quot;: &quot;USD&quot;
+      }
+    }
+  ],
+  &quot;recovered_count&quot;: 100
+}</pre></details><details><summary>Truncated archive</summary><dl class='facts'><div><dt>Archive SHA-256</dt><dd>24cc5d893675985b13086020a4c7d24fea7484fed40f43575efa72d82f406838</dd></div><div><dt>Archive size (bytes)</dt><dd>8</dd></div><div><dt>Restore exit code</dt><dd>1</dd></div><div><dt>Orders table after restore</dt><dd>Absent</dd></div><div><dt>HTTP order probe</dt><dd>Skipped after restore failure</dd></div></dl><p class='note'>Reconciliation did not run. Order completeness is unknown.</p><h4>Restore diagnostic</h4><pre>pg_restore: error: could not read from input file: end of file</pre><h4>Expected evidence</h4><pre>{
+  &quot;archive_bytes&quot;: 8,
+  &quot;orders_table_present&quot;: false,
+  &quot;ready_seconds&quot;: null
+}</pre></details>
+<footer><p>Server 17.12 (Debian 17.12-1.pgdg13+1) · Dump tool pg_dump (PostgreSQL) 17.12 (Debian 17.12-1.pgdg13+1) · Restore tool pg_restore (PostgreSQL) 17.12 (Debian 17.12-1.pgdg13+1)</p><a href="report.json">Open JSON report</a>
+ · <a href="observations.json">Open captured journal and recovered orders</a></footer>
+</main></body></html>

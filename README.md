@@ -2,6 +2,18 @@
 
 Would a shop get all its orders back after a restore? This lab accepts 100 orders over HTTP, takes real PostgreSQL backups, restores them into empty databases and checks every recovered order against a separate receipt journal. One archive restores cleanly and returns all 100 IDs. The amount on one recovered order is a dollar higher than the customer agreed to pay.
 
+![Recorded recovery drill. The first three restores served an order. Exact matches were 100, 95 and 99 out of 100. The fourth restore failed.](examples/report-preview.png)
+
+The recorded run used PostgreSQL 17.12 on a GitHub-hosted Ubuntu runner. The stale archive served its first verified order in 44 ms and still lacked the last five purchases. Expand **Altered order** in the downloaded HTML to inspect the amount difference. The JSON files contain the measurements and original observations from that run. [Workflow log](https://github.com/y3sh1/postgres-recovery-drill/actions/runs/45623098918/job/139236136387) · [Report JSON](examples/report.json) · [Captured rows](examples/observations.json) · [HTML report](examples/report.html)
+
+To inspect the saved run without installing PostgreSQL or Docker, clone the repository and rerun the comparison using the Python standard library.
+
+~~~sh
+git clone https://github.com/y3sh1/postgres-recovery-drill.git
+cd postgres-recovery-drill
+python -m drill.verify examples
+~~~
+
 ## Run the drill
 
 Install Docker with Compose v2. From the repository root, run the commands below. The project starts its own PostgreSQL 17 server on a private Compose network. The service and database publish no host ports.
