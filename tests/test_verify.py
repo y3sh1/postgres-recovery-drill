@@ -93,6 +93,18 @@ class VerifierTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "failed restore"):
             verify(self.root)
 
+    def test_first_read_requires_an_exact_purchase_in_both_stores(self):
+        cases = {case["name"]: case for case in self.report["scenarios"]}
+        for scenario, order_id in (("fresh", "never-accepted"), ("stale", "B"), ("altered", "B")):
+            with self.subTest(scenario=scenario):
+                case = cases[scenario]
+                original = case["probe_order_id"]
+                case["probe_order_id"] = order_id
+                self.save()
+                with self.assertRaisesRegex(ValueError, "successful HTTP probe"):
+                    verify(self.root)
+                case["probe_order_id"] = original
+
     def test_wrong_observed_outcome_and_false_success_detected(self):
         self.report["scenarios"][2]["outcome"] = "verified"
         self.save()

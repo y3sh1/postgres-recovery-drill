@@ -85,6 +85,13 @@ def verify_case(case, recovered, journal):
                 or not math.isfinite(ready) or not math.isfinite(restore)
                 or not 0 <= restore <= ready or case["probe_http_status"] != 200):
             raise ValueError(f"{name}: first-read timing or HTTP status is inconsistent")
+        probe_id = case["probe_order_id"]
+        receipt = next((row for row in journal if row["order_id"] == probe_id), None)
+        stored = next((row for row in recovered if row["order_id"] == probe_id), None)
+        if receipt is None or stored is None or any(
+            receipt[field] != stored[field] for field in ("amount_cents", "currency")
+        ):
+            raise ValueError(f"{name}: the successful HTTP probe has no matching captured purchase")
         observed = data_outcome(computed)
     if observed != outcome:
         raise ValueError(f"{name}: observed outcome should be {observed!r}")
