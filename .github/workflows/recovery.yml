@@ -1,0 +1,45 @@
+name: PostgreSQL recovery drill
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    name: Restore and reconcile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build lab and start PostgreSQL
+        run: |
+          docker compose build
+          docker compose up -d --wait db
+      - name: Test receipt handling, service and report
+        run: docker compose run --rm -e SHOP_TEST_DSN=postgresql://drill@db/postgres drill python -m pytest -q -p no:cacheprovider
+      - name: Exercise four restores
+        run: docker compose up --no-build --abort-on-container-exit --exit-code-from drill
+      - name: Copy evidence
+        if: always()
+        run: |
+          mkdir -p artifacts
+          docker compose cp drill:/reports/. ./artifacts
+      - name: Verify evidence against the scenario contract
+        run: |
+          python3 tests/check_evidence.py artifacts/report.json
+          python3 -m drill.verify artifacts
+      - name: Save JSON and HTML
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: recovery-evidence
+          path: |
+            artifacts/report.json
+            artifacts/report.html
+            artifacts/observations.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Remove disposable lab
+        if: always()
+        run: docker compose down --volumes --remove-orphans

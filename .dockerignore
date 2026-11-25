@@ -1,0 +1,12 @@
+*
+!shop/
+!shop/**
+!drill/
+!drill/**
+!tests/
+!tests/**
+!requirements.txt
+!requirements-dev.txt
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc

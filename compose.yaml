@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:17.12-trixie@sha256:87c8b42f423b45d5247e6aa8fdb2e7762fec164c68a50fe3eb07e7bfcaf4dbcf
+    environment:
+      POSTGRES_USER: drill
+      POSTGRES_PASSWORD: disposable-lab-only
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "drill", "-d", "postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks: [lab]
+
+  drill:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: drill
+      PGPASSWORD: disposable-lab-only
+    networks: [lab]
+
+networks:
+  lab:
+    internal: true
